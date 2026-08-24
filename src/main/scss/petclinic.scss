@@ -209,6 +209,17 @@ hr {
   border-top: 1px dotted $spring-brown;
 }
 
+.char-counter {
+  font-size: 0.85em;
+  color: $spring-grey;
+  margin-top: 5px;
+  display: block;
+}
+
+.char-counter.text-danger {
+  color: #DC3545;
+}
+
 @import "typography.scss";
 @import "header.scss";
 @import "responsive.scss";
