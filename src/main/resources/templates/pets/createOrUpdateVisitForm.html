@@ -30,7 +30,14 @@
   <form th:object="${visit}" class="form-horizontal" method="post">
     <div class="form-group has-feedback">
       <input th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}" />
-      <input th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
+      <label class="col-sm-2 control-label" th:text="#{description}">Description</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" id="description" th:field="*{description}" maxlength="500"></textarea>
+        <span id="charCounter" class="char-counter"></span>
+        <span class="help-block" th:if="${#fields.hasErrors('description')}">
+          <p th:each="err : ${#fields.errors('description')}" th:text="${err}">Error</p>
+        </span>
+      </div>
     </div>
 
     <div class="form-group">
@@ -53,6 +60,33 @@
       <td th:text=" ${visit.description}"></td>
     </tr>
   </table>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      const descriptionTextarea = document.getElementById('description');
+      const charCounter = document.getElementById('charCounter');
+      const maxLength = 500;
+      const warningThreshold = 50;
+
+      function updateCharCounter() {
+        const currentLength = descriptionTextarea.value.length;
+        const remaining = maxLength - currentLength;
+        charCounter.textContent = `${remaining} characters remaining`;
+
+        if (remaining < warningThreshold) {
+          charCounter.classList.add('warning');
+        } else {
+          charCounter.classList.remove('warning');
+        }
+      }
+
+      if (descriptionTextarea && charCounter) {
+        descriptionTextarea.addEventListener('input', updateCharCounter);
+        // Initialize counter on page load
+        updateCharCounter();
+      }
+    });
+  </script>
 
 </body>
 
