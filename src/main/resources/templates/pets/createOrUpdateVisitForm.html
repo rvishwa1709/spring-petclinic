@@ -31,6 +31,7 @@
     <div class="form-group has-feedback">
       <input th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}" />
       <input th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
+      <span id="description-char-counter" class="char-counter"></span>
     </div>
 
     <div class="form-group">
@@ -53,6 +54,33 @@
       <td th:text=" ${visit.description}"></td>
     </tr>
   </table>
+
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      const descriptionTextarea = document.querySelector('input[name="description"]');
+      const charCounter = document.getElementById('description-char-counter');
+      const MAX_CHARS = 500;
+      const WARNING_THRESHOLD = 50;
+
+      function updateCharCounter() {
+        const currentLength = descriptionTextarea.value.length;
+        const remainingChars = MAX_CHARS - currentLength;
+        charCounter.textContent = `${remainingChars} characters remaining`;
+
+        if (remainingChars < WARNING_THRESHOLD) {
+          charCounter.classList.add('warning');
+        } else {
+          charCounter.classList.remove('warning');
+        }
+      }
+
+      if (descriptionTextarea && charCounter) {
+        descriptionTextarea.addEventListener('input', updateCharCounter);
+        // Initialize counter on page load
+        updateCharCounter();
+      }
+    });
+  </script>
 
 </body>
 
