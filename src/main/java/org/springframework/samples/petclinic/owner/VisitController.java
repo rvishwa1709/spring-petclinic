@@ -72,7 +72,7 @@ class VisitController {
 			throw new IllegalArgumentException(
 					"Pet with id " + petId + " not found for owner with id " + ownerId + ".");
 		}
-		model.put("pet", pet);
+			model.put("pet", pet);
 		model.put("owner", owner);
 
 		Visit visit = new Visit();
@@ -97,7 +97,8 @@ class VisitController {
 	@PostMapping("/owners/{ownerId}/pets/{petId}/visits/new")
 	public String processNewVisitForm(@ModelAttribute Owner owner, @PathVariable int petId, @Valid Visit visit,
 			BindingResult result, RedirectAttributes redirectAttributes) {
-		if (visit.getDate() != null && !visit.getDate().isAfter(LocalDate.now())) {
+		if (visit.getDate() != null && (!visit.getDate().isAfter(LocalDate.now())
+				|| visit.getDate().isAfter(LocalDate.now().plusDays(90)))) {
 			result.rejectValue("date", "typeMismatch.visitDate");
 		}
 
