@@ -4,6 +4,14 @@
 
 <body>
 
+  <style>
+    .char-counter {
+      display: block;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+  </style>
+
   <h2>
     <th:block th:if="${visit['new']}" th:text="#{new}">New </th:block>
     Visit
@@ -31,6 +39,9 @@
     <div class="form-group has-feedback">
       <input th:replace="~{fragments/inputField :: input ('Date', 'date', 'date')}" />
       <input th:replace="~{fragments/inputField :: input ('Description', 'description', 'text')}" />
+      <div class="col-sm-offset-2 col-sm-10">
+        <span id="char-counter" class="char-counter"></span>
+      </div>
     </div>
 
     <div class="form-group">
@@ -53,6 +64,28 @@
       <td th:text=" ${visit.description}"></td>
     </tr>
   </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var maxChars = 500;
+      var descInput = document.querySelector('input[name="description"], textarea[name="description"], #description');
+      var counter = document.getElementById('char-counter');
+      if (descInput && counter) {
+        function updateCounter() {
+          var remaining = maxChars - (descInput.value ? descInput.value.length : 0);
+          counter.textContent = remaining + ' characters remaining';
+          if (remaining < 50) {
+            counter.style.color = '#DC3545';
+          } else {
+            counter.style.color = '';
+          }
+        }
+        descInput.addEventListener('input', updateCounter);
+        descInput.addEventListener('keyup', updateCounter);
+        updateCounter();
+      }
+    });
+  </script>
 
 </body>
 
