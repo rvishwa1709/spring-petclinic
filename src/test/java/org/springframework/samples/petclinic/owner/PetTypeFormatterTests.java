@@ -68,6 +68,15 @@ class PetTypeFormatterTests {
 	}
 
 	@Test
+	void shouldParseCaseInsensitive() throws ParseException {
+		given(types.findPetTypes()).willReturn(makePetTypes());
+		PetType petType = petTypeFormatter.parse("bird", Locale.ENGLISH);
+		assertThat(petType.getName()).isEqualTo("Bird");
+		PetType dogType = petTypeFormatter.parse("DOG", Locale.ENGLISH);
+		assertThat(dogType.getName()).isEqualTo("Dog");
+	}
+
+	@Test
 	void shouldThrowParseException() {
 		given(types.findPetTypes()).willReturn(makePetTypes());
 		Assertions.assertThrows(ParseException.class, () -> {
