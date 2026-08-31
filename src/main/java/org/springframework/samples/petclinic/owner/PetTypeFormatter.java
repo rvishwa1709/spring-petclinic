@@ -40,7 +40,7 @@ public class PetTypeFormatter implements Formatter<PetType> {
 
 	public PetTypeFormatter(PetTypeRepository types) {
 		this.types = types;
-	}
+		}
 
 	@Override
 	public String print(PetType petType, Locale locale) {
@@ -52,7 +52,7 @@ public class PetTypeFormatter implements Formatter<PetType> {
 	public PetType parse(String text, Locale locale) throws ParseException {
 		Collection<PetType> findPetTypes = this.types.findPetTypes();
 		for (PetType type : findPetTypes) {
-			if (Objects.equals(type.getName(), text)) {
+			if (type.getName() != null && type.getName().equalsIgnoreCase(text)) {
 				return type;
 			}
 		}
