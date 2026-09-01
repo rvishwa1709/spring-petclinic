@@ -15,6 +15,8 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.time.LocalDate;
+
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -51,6 +53,9 @@ public class PetValidator implements Validator {
 		if (pet.getBirthDate() == null) {
 			errors.rejectValue("birthDate", REQUIRED, REQUIRED);
 		}
+		else if (pet.getBirthDate().isAfter(LocalDate.now())) {
+			errors.rejectValue("birthDate", "typeMismatch.birthDate");
+		}
 	}
 
 	/**
@@ -59,6 +64,6 @@ public class PetValidator implements Validator {
 	@Override
 	public boolean supports(Class<?> clazz) {
 		return Pet.class.isAssignableFrom(clazz);
-	}
+		}
 
 }
