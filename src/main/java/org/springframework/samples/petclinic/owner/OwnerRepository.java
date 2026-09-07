@@ -8,7 +8,7 @@
  *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.owner;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -43,6 +44,14 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * found)
 	 */
 	Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	/**
+	 * Retrieve {@link Owner}s from the data store by telephone.
+	 * @param telephone Value to search for
+	 * @param pageable Pageable
+	 * @return a Page of matching {@link Owner}s
+	 */
+	Page<Owner> findByTelephone(String telephone, Pageable pageable);
 
 	/**
 	 * Retrieve an {@link Owner} from the data store by id.
