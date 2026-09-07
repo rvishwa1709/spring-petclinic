@@ -89,33 +89,45 @@ class PetValidatorTests {
 
 		@Test
 		void validateWithInvalidPetName() {
-			petType.setName(petTypeName);
-			pet.setName("");
-			pet.setType(petType);
-			pet.setBirthDate(petBirthDate);
+		petType.setName(petTypeName);
+		pet.setName("");
+		pet.setType(petType);
+		pet.setBirthDate(petBirthDate);
 
-			petValidator.validate(pet, errors);
+		petValidator.validate(pet, errors);
 
-			assertTrue(errors.hasFieldErrors("name"));
+		assertTrue(errors.hasFieldErrors("name"));
 		}
 
 		@Test
 		void validateWithInvalidPetType() {
-			pet.setName(petName);
-			pet.setType(null);
-			pet.setBirthDate(petBirthDate);
+		pet.setName(petName);
+		pet.setType(null);
+		pet.setBirthDate(petBirthDate);
 
-			petValidator.validate(pet, errors);
+		petValidator.validate(pet, errors);
 
-			assertTrue(errors.hasFieldErrors("type"));
+		assertTrue(errors.hasFieldErrors("type"));
 		}
 
 		@Test
 		void validateWithInvalidBirthDate() {
+		petType.setName(petTypeName);
+		pet.setName(petName);
+		pet.setType(petType);
+		pet.setBirthDate(null);
+
+		petValidator.validate(pet, errors);
+
+		assertTrue(errors.hasFieldErrors("birthDate"));
+		}
+
+		@Test
+		void validateWithFutureBirthDate() {
 			petType.setName(petTypeName);
 			pet.setName(petName);
 			pet.setType(petType);
-			pet.setBirthDate(null);
+			pet.setBirthDate(LocalDate.now().plusDays(1));
 
 			petValidator.validate(pet, errors);
 
