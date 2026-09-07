@@ -157,7 +157,7 @@ class PetControllerTests {
 				.andExpect(model().attributeHasNoErrors("owner"))
 				.andExpect(model().attributeHasErrors("pet"))
 				.andExpect(model().attributeHasFieldErrors("pet", "birthDate"))
-				.andExpect(model().attributeHasFieldErrorCode("pet", "birthDate", "typeMismatch.birthDate"))
+				.andExpect(model().attributeHasFieldErrorCode("pet", "birthDate", "futureDate"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("pets/createOrUpdatePetForm"));
 		}
@@ -201,10 +201,10 @@ class PetControllerTests {
 	@Test
 	void processUpdateFormWithSameName() throws Exception {
 		mockMvc.perform(post("/owners/{ownerId}/pets/{petId}/edit", TEST_OWNER_ID, TEST_PET_ID).param("name", "petty") // same
-																														// name
-																														// as
-																														// existing
-																														// pet
+																										// name
+																										// as
+																										// existing
+																										// pet
 			.param("type", "hamster")
 			.param("birthDate", "2015-02-12"))
 			.andExpect(status().is3xxRedirection())
@@ -238,6 +238,23 @@ class PetControllerTests {
 				.andExpect(model().attributeHasErrors("pet"))
 				.andExpect(model().attributeHasFieldErrors("pet", "birthDate"))
 				.andExpect(model().attributeHasFieldErrorCode("pet", "birthDate", "typeMismatch"))
+				.andExpect(view().name("pets/createOrUpdatePetForm"));
+		}
+
+		@Test
+		void processUpdateFormWithFutureBirthDate() throws Exception {
+			LocalDate currentDate = LocalDate.now();
+			String futureBirthDate = currentDate.plusMonths(1).toString();
+
+			mockMvc
+				.perform(post("/owners/{ownerId}/pets/{petId}/edit", TEST_OWNER_ID, TEST_PET_ID).param("name", "Betty")
+					.param("type", "hamster")
+					.param("birthDate", futureBirthDate))
+				.andExpect(model().attributeHasNoErrors("owner"))
+				.andExpect(model().attributeHasErrors("pet"))
+				.andExpect(model().attributeHasFieldErrors("pet", "birthDate"))
+				.andExpect(model().attributeHasFieldErrorCode("pet", "birthDate", "futureDate"))
+				.andExpect(status().isOk())
 				.andExpect(view().name("pets/createOrUpdatePetForm"));
 		}
 
