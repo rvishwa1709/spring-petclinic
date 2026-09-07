@@ -84,6 +84,17 @@ class VisitControllerTests {
 	}
 
 	@Test
+	void processNewVisitFormSuccessForToday() throws Exception {
+		mockMvc
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+				.param("name", "George")
+				.param("date", LocalDate.now().toString())
+				.param("description", "Visit Description"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	}
+
+	@Test
 	void processNewVisitFormHasErrors() throws Exception {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).param("name",
@@ -94,11 +105,11 @@ class VisitControllerTests {
 	}
 
 	@Test
-	void processNewVisitFormHasErrorsWhenVisitDateIsNotInFuture() throws Exception {
+	void processNewVisitFormHasErrorsWhenVisitDateIsInPast() throws Exception {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")
-				.param("date", LocalDate.now().toString())
+				.param("date", LocalDate.now().minusDays(1).toString())
 				.param("description", "Visit Description"))
 			.andExpect(model().attributeHasFieldErrors("visit", "date"))
 			.andExpect(model().attributeHasFieldErrorCode("visit", "date", "typeMismatch.visitDate"))
