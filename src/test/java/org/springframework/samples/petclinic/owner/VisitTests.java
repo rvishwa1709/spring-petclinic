@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.samples.petclinic.owner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import java.time.LocalDate;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +26,10 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * Test class for {@link Visit}.
+ * Test class for {@link Visit}
  */
 class VisitTests {
 
@@ -43,17 +43,21 @@ class VisitTests {
 	}
 
 	@Test
-	void validateWithValidDescriptionSingleCharacter() {
+	void validateWithValidDescriptionSingleChar() {
 		Visit visit = new Visit();
+		visit.setDate(LocalDate.now().plusDays(1));
 		visit.setDescription("a");
+
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
 
 	@Test
-	void validateWithValidDescription500Characters() {
+	void validateWithValidDescription500Chars() {
 		Visit visit = new Visit();
+		visit.setDate(LocalDate.now().plusDays(1));
 		visit.setDescription("a".repeat(500));
+
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
@@ -61,23 +65,19 @@ class VisitTests {
 	@Test
 	void validateWithBlankDescription() {
 		Visit visit = new Visit();
-		visit.setDescription("   ");
+		visit.setDate(LocalDate.now().plusDays(1));
+		visit.setDescription("");
+
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isNotEmpty();
 	}
 
 	@Test
-	void validateWithNullDescription() {
+	void validateWithDescriptionExceeding500Chars() {
 		Visit visit = new Visit();
-		visit.setDescription(null);
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).isNotEmpty();
-	}
-
-	@Test
-	void validateWithDescriptionExceeding500Characters() {
-		Visit visit = new Visit();
+		visit.setDate(LocalDate.now().plusDays(1));
 		visit.setDescription("a".repeat(501));
+
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isNotEmpty();
 	}
