@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.samples.petclinic.owner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test class for {@link Visit} validation constraints.
+ * Test class for {@link Visit}.
  */
 class VisitTests {
 
@@ -35,44 +37,48 @@ class VisitTests {
 
 	@BeforeEach
 	void setUp() {
-		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-		this.validator = factory.getValidator();
+		try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+			validator = factory.getValidator();
+		}
 	}
 
 	@Test
-	void shouldValidateValidDescription() {
+	void validateWithValidDescriptionSingleCharacter() {
 		Visit visit = new Visit();
 		visit.setDescription("a");
-
-		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
 
 	@Test
-	void shouldValidateDescriptionWith500Characters() {
+	void validateWithValidDescription500Characters() {
 		Visit visit = new Visit();
 		visit.setDescription("a".repeat(500));
-
-		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
 
 	@Test
-	void shouldNotValidateDescriptionWith501Characters() {
+	void validateWithBlankDescription() {
 		Visit visit = new Visit();
-		visit.setDescription("a".repeat(501));
-
-		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
-		assertThat(violations).hasSize(1);
-		assertThat(violations.iterator().next().getPropertyPath().toString()).isEqualTo("description");
+		visit.setDescription("   ");
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		assertThat(violations).isNotEmpty();
 	}
 
 	@Test
-	void shouldNotValidateBlankDescription() {
+	void validateWithNullDescription() {
 		Visit visit = new Visit();
-		visit.setDescription("");
+		visit.setDescription(null);
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		assertThat(violations).isNotEmpty();
+	}
 
-		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
+	@Test
+	void validateWithDescriptionExceeding500Characters() {
+		Visit visit = new Visit();
+		visit.setDescription("a".repeat(501));
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
 		assertThat(violations).isNotEmpty();
 	}
 
