@@ -84,6 +84,18 @@ class PetValidatorTests {
 		assertFalse(errors.hasErrors());
 	}
 
+	@Test
+	void validateWithBirthDateToday() {
+		petType.setName(petTypeName);
+		pet.setName(petName);
+		pet.setType(petType);
+		pet.setBirthDate(LocalDate.now());
+
+		petValidator.validate(pet, errors);
+
+		assertFalse(errors.hasErrors());
+	}
+
 	@Nested
 	class ValidateHasErrors {
 
@@ -101,25 +113,25 @@ class PetValidatorTests {
 
 		@Test
 		void validateWithInvalidPetType() {
-		pet.setName(petName);
-		pet.setType(null);
-		pet.setBirthDate(petBirthDate);
+			pet.setName(petName);
+			pet.setType(null);
+			pet.setBirthDate(petBirthDate);
 
-		petValidator.validate(pet, errors);
+			petValidator.validate(pet, errors);
 
-		assertTrue(errors.hasFieldErrors("type"));
+			assertTrue(errors.hasFieldErrors("type"));
 		}
 
 		@Test
 		void validateWithInvalidBirthDate() {
-		petType.setName(petTypeName);
-		pet.setName(petName);
-		pet.setType(petType);
-		pet.setBirthDate(null);
+			petType.setName(petTypeName);
+			pet.setName(petName);
+			pet.setType(petType);
+			pet.setBirthDate(null);
 
-		petValidator.validate(pet, errors);
+			petValidator.validate(pet, errors);
 
-		assertTrue(errors.hasFieldErrors("birthDate"));
+			assertTrue(errors.hasFieldErrors("birthDate"));
 		}
 
 		@Test
