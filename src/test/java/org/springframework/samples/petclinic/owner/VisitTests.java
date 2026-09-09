@@ -15,21 +15,19 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.time.LocalDate;
 import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test class for {@link Visit}
+ * Test class for {@link Visit} validation constraints.
  */
 class VisitTests {
 
@@ -43,43 +41,35 @@ class VisitTests {
 	}
 
 	@Test
-	void validateWithValidDescriptionSingleChar() {
+	void shouldNotValidateWhenDescriptionIsBlank() {
 		Visit visit = new Visit();
-		visit.setDate(LocalDate.now().plusDays(1));
-		visit.setDescription("a");
-
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).isEmpty();
-	}
-
-	@Test
-	void validateWithValidDescription500Chars() {
-		Visit visit = new Visit();
-		visit.setDate(LocalDate.now().plusDays(1));
-		visit.setDescription("a".repeat(500));
-
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).isEmpty();
-	}
-
-	@Test
-	void validateWithBlankDescription() {
-		Visit visit = new Visit();
-		visit.setDate(LocalDate.now().plusDays(1));
 		visit.setDescription("");
-
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).isNotEmpty();
+		assertThat(violations).hasSize(1);
 	}
 
 	@Test
-	void validateWithDescriptionExceeding500Chars() {
+	void shouldValidateWhenDescriptionIs1Character() {
 		Visit visit = new Visit();
-		visit.setDate(LocalDate.now().plusDays(1));
-		visit.setDescription("a".repeat(501));
-
+		visit.setDescription("A");
 		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).isNotEmpty();
+		assertThat(violations).isEmpty();
+	}
+
+	@Test
+	void shouldValidateWhenDescriptionIs500Characters() {
+		Visit visit = new Visit();
+		visit.setDescription("a".repeat(500));
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		assertThat(violations).isEmpty();
+	}
+
+	@Test
+	void shouldNotValidateWhenDescriptionExceeds500Characters() {
+		Visit visit = new Visit();
+		visit.setDescription("a".repeat(501));
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		assertThat(violations).hasSize(1);
 	}
 
 }
