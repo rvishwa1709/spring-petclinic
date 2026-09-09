@@ -50,6 +50,8 @@ class PetController {
 
 	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
+	private static final String REDIRECT_OWNER_DETAILS = "redirect:/owners/{ownerId}";
+
 	private final OwnerRepository owners;
 
 	private final PetTypeRepository types;
@@ -133,7 +135,7 @@ class PetController {
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
-		return "redirect:/owners/{ownerId}";
+		return REDIRECT_OWNER_DETAILS;
 	}
 
 	@GetMapping("/pets/{petId}/edit")
@@ -175,7 +177,21 @@ class PetController {
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 		redirectAttributes.addFlashAttribute("message", "Pet details has been edited");
-		return "redirect:/owners/{ownerId}";
+		return REDIRECT_OWNER_DETAILS;
+	}
+
+	@PostMapping("/pets/{petId}/delete")
+	public String processDeletePet(Owner owner, @PathVariable("ownerId") int ownerId,
+			@PathVariable("petId") int petId, RedirectAttributes redirectAttributes) {
+		Pet pet = owner.getPet(petId);
+		if (pet == null) {
+			throw new IllegalArgumentException(
+					"Pet with id " + petId + " not found for owner with id " + ownerId + ".");
+		}
+		owner.getPets().remove(pet);
+		this.owners.saveAndFlush(owner);
+		redirectAttributes.addFlashAttribute("message", "Pet has been deleted");
+		return REDIRECT_OWNER_DETAILS;
 	}
 
 	/**
