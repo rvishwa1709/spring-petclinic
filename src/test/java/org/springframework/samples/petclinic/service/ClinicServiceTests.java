@@ -99,6 +99,7 @@ class ClinicServiceTests {
 	void shouldFindOwnersByTelephone() {
 		Page<Owner> owners = this.owners.findByTelephone("6085551023", pageable);
 		assertThat(owners).hasSize(1);
+		assertThat(owners.iterator().next().getLastName()).isEqualTo("Franklin");
 
 		owners = this.owners.findByTelephone("0000000000", pageable);
 		assertThat(owners).isEmpty();
