@@ -95,7 +95,7 @@ class OwnerController {
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
 		String telephone = owner.getTelephone();
-		if (telephone != null && !telephone.strip().isEmpty()) {
+		if (telephone != null && !telephone.isBlank()) {
 			telephone = telephone.strip();
 			Page<Owner> ownersResults = findPaginatedForOwnersTelephone(page, telephone);
 			if (ownersResults.isEmpty()) {
@@ -103,7 +103,7 @@ class OwnerController {
 				return "owners/findOwners";
 			}
 
-		if (ownersResults.getTotalElements() == 1) {
+			if (ownersResults.getTotalElements() == 1) {
 				owner = ownersResults.iterator().next();
 				return "redirect:/owners/" + owner.getId();
 			}
