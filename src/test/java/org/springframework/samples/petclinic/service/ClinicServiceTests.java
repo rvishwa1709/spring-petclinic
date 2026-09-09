@@ -53,11 +53,11 @@ import org.springframework.transaction.annotation.Transactional;
  * <li><strong>Dependency Injection</strong> of test fixture instances, meaning that we
  * don't need to perform application context lookups. See the use of
  * {@link Autowired @Autowired} on the <code> </code> instance variable, which uses
- * autowiring <em>by type</em>.
+ * autowiring <em>by type</em>.</li>
  * <li><strong>Transaction management</strong>, meaning each test method is executed in
  * its own transaction, which is automatically rolled back by default. Thus, even if tests
  * insert or otherwise change database state, there is no need for a teardown or cleanup
- * script.
+ * script.</li>
  * <li>An {@link org.springframework.context.ApplicationContext ApplicationContext} is
  * also inherited and can be used for explicit bean lookup if necessary.</li>
  * </ul>
@@ -299,7 +299,7 @@ class ClinicServiceTests {
 
 		Pet pet2 = new Pet();
 		pet2.setName("samepetname"); // Case-insensitive duplicate name, but for a
-										// different owner
+    // different owner
 		pet2.setType(catType);
 		pet2.setBirthDate(LocalDate.now());
 		owner2.addPet(pet2);
@@ -310,6 +310,29 @@ class ClinicServiceTests {
 		// Verify both exist
 		assertThat(owner1.getPet("SamePetName")).isNotNull();
 		assertThat(owner2.getPet("samepetname")).isNotNull();
+	}
+
+	@Test
+	@Transactional
+	void shouldDeletePetAndVisits() {
+		Optional<Owner> optionalOwner = this.owners.findById(6);
+		assertThat(optionalOwner).isPresent();
+		Owner owner6 = optionalOwner.get();
+
+		Pet pet7 = owner6.getPet(7);
+		assertThat(pet7).isNotNull();
+		assertThat(pet7.getVisits()).isNotEmpty();
+		int initialPetCount = owner6.getPets().size();
+
+		owner6.getPets().remove(pet7);
+		this.owners.saveAndFlush(owner6);
+
+		Optional<Owner> refreshedOwnerOpt = this.owners.findById(6);
+		assertThat(refreshedOwnerOpt).isPresent();
+		Owner refreshedOwner = refreshedOwnerOpt.get();
+		assertThat(refreshedOwner.getPets()).hasSize(initialPetCount - 1);
+		assertThat(refreshedOwner.getPet(7)).isNull();
+		assertThat(refreshedOwner.getPet(8)).isNotNull();
 	}
 
 }
