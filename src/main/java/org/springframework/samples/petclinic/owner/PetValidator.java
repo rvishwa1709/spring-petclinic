@@ -35,6 +35,10 @@ public class PetValidator implements Validator {
 
 	private static final String REQUIRED = "required";
 
+	private static final String FUTURE_DATE = "futureDate";
+
+	private static final String BIRTH_DATE = "birthDate";
+
 	@Override
 	public void validate(Object obj, Errors errors) {
 		Pet pet = (Pet) obj;
@@ -50,11 +54,12 @@ public class PetValidator implements Validator {
 		}
 
 		// birth date validation
-		if (pet.getBirthDate() == null) {
-			errors.rejectValue("birthDate", REQUIRED, REQUIRED);
+		LocalDate birthDate = pet.getBirthDate();
+		if (birthDate == null) {
+			errors.rejectValue(BIRTH_DATE, REQUIRED, REQUIRED);
 		}
-		else if (pet.getBirthDate().isAfter(LocalDate.now())) {
-			errors.rejectValue("birthDate", "futureDate", "cannot be in the future");
+		else if (birthDate.isAfter(LocalDate.now())) {
+			errors.rejectValue(BIRTH_DATE, FUTURE_DATE, "cannot be in the future");
 		}
 	}
 
