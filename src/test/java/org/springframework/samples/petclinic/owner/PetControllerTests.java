@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -201,10 +202,10 @@ class PetControllerTests {
 	@Test
 	void processUpdateFormWithSameName() throws Exception {
 		mockMvc.perform(post("/owners/{ownerId}/pets/{petId}/edit", TEST_OWNER_ID, TEST_PET_ID).param("name", "petty") // same
-																														// name
-																														// as
-																														// existing
-																														// pet
+    // name
+    // as
+    // existing
+    // pet
 			.param("type", "hamster")
 			.param("birthDate", "2015-02-12"))
 			.andExpect(status().is3xxRedirection())
@@ -269,6 +270,21 @@ class PetControllerTests {
 				.andExpect(view().name("pets/createOrUpdatePetForm"));
 		}
 
+	}
+
+	@Test
+	void testProcessDeletePetSuccess() throws Exception {
+		mockMvc.perform(post("/owners/{ownerId}/pets/{petId}/delete", TEST_OWNER_ID, TEST_PET_ID))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	}
+
+	@Test
+	void testProcessDeletePetInvalidOwner() {
+		int nonExistentPetId = 999;
+		assertThrows(Exception.class, () -> {
+			mockMvc.perform(post("/owners/{ownerId}/pets/{petId}/delete", TEST_OWNER_ID, nonExistentPetId));
+		});
 	}
 
 }
