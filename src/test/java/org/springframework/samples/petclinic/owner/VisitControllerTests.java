@@ -77,6 +77,17 @@ class VisitControllerTests {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")
+				.param("date", LocalDate.now().plusDays(1).toString())
+				.param("description", "Visit Description"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/{ownerId}"));
+	}
+
+	@Test
+	void processNewVisitFormSuccessWithTodayDate() throws Exception {
+		mockMvc
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+				.param("name", "George")
 				.param("date", LocalDate.now().toString())
 				.param("description", "Visit Description"))
 			.andExpect(status().is3xxRedirection())
