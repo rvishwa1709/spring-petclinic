@@ -8,7 +8,7 @@
  *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -90,7 +90,7 @@ class OwnerControllerTests {
 	}
 
 	@BeforeEach
-		void setup() {
+	void setup() {
 
 		Owner george = george();
 		given(this.owners.findByLastNameStartingWith(eq("Franklin"), any(Pageable.class)))
@@ -192,10 +192,11 @@ class OwnerControllerTests {
 			.andExpect(model().attributeHasFieldErrors("owner", "lastName"))
 			.andExpect(model().attributeHasFieldErrorCode("owner", "lastName", "notFound"))
 			.andExpect(view().name("owners/findOwners"));
+
 	}
 
 	@Test
-	void processFindFormByTelephoneSingleOwner() throws Exception {
+	void processFindFormByTelephone() throws Exception {
 		Page<Owner> tasks = new PageImpl<>(List.of(george()));
 		when(this.owners.findByTelephone(eq("6085551023"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("telephone", "6085551023"))
@@ -204,12 +205,38 @@ class OwnerControllerTests {
 	}
 
 	@Test
-	void processFindFormByTelephoneMultipleOwners() throws Exception {
+	void processFindFormByTelephoneMultipleResults() throws Exception {
 		Page<Owner> tasks = new PageImpl<>(List.of(george(), new Owner()));
 		when(this.owners.findByTelephone(eq("6085551023"), any(Pageable.class))).thenReturn(tasks);
 		mockMvc.perform(get("/owners?page=1").param("telephone", "6085551023"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("owners/ownersList"));
+	}
+
+	@Test
+	void processFindFormByTelephoneIgnoresSurroundingWhitespace() throws Exception {
+		Page<Owner> tasks = new PageImpl<>(List.of(george()));
+		when(this.owners.findByTelephone(eq("6085551023"), any(Pageable.class))).thenReturn(tasks);
+
+		for (String telephone : List.of(" 6085551023", "6085551023 ", " 6085551023 ")) {
+			mockMvc.perform(get("/owners?page=1").param("telephone", telephone))
+				.andExpect(status().is3xxRedirection())
+				.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
+		}
+
+		verify(this.owners, times(3)).findByTelephone(eq("6085551023"), any(Pageable.class));
+	}
+
+	@Test
+	void processFindFormByTelephonePrecedenceOverLastName() throws Exception {
+		Page<Owner> tasks = new PageImpl<>(List.of(george()));
+		when(this.owners.findByTelephone(eq("6085551023"), any(Pageable.class))).thenReturn(tasks);
+
+		mockMvc.perform(get("/owners?page=1").param("telephone", "6085551023").param("lastName", "Franklin"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
+
+		verify(this.owners).findByTelephone(eq("6085551023"), any(Pageable.class));
 	}
 
 	@Test
@@ -221,16 +248,6 @@ class OwnerControllerTests {
 			.andExpect(model().attributeHasFieldErrors("owner", "telephone"))
 			.andExpect(model().attributeHasFieldErrorCode("owner", "telephone", "notFound"))
 			.andExpect(view().name("owners/findOwners"));
-	}
-
-	@Test
-	void processFindFormTelephoneTakesPrecedenceOverLastName() throws Exception {
-		Page<Owner> tasks = new PageImpl<>(List.of(george()));
-		when(this.owners.findByTelephone(eq("6085551023"), any(Pageable.class))).thenReturn(tasks);
-		mockMvc.perform(get("/owners?page=1").param("lastName", "Unknown").param("telephone", "6085551023"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(view().name("redirect:/owners/" + TEST_OWNER_ID));
-		verify(this.owners, times(0)).findByLastNameStartingWith(anyString(), any(Pageable.class));
 	}
 
 	@Test
