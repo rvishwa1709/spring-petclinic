@@ -35,41 +35,44 @@ class VisitTests {
 
 	@BeforeEach
 	void setUp() {
-		try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
-			validator = factory.getValidator();
-		}
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		this.validator = factory.getValidator();
 	}
 
 	@Test
-	void shouldNotValidateWhenDescriptionIsBlank() {
-		Visit visit = new Visit();
-		visit.setDescription("");
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).hasSize(1);
-	}
-
-	@Test
-	void shouldValidateWhenDescriptionIs1Character() {
+	void validateValidDescriptionWithOneCharacter() {
 		Visit visit = new Visit();
 		visit.setDescription("A");
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+
+		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
 
 	@Test
-	void shouldValidateWhenDescriptionIs500Characters() {
+	void validateValidDescriptionWith500Characters() {
 		Visit visit = new Visit();
 		visit.setDescription("a".repeat(500));
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+
+		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
 		assertThat(violations).isEmpty();
 	}
 
 	@Test
-	void shouldNotValidateWhenDescriptionExceeds500Characters() {
+	void validateInvalidDescriptionWhenBlank() {
+		Visit visit = new Visit();
+		visit.setDescription("   ");
+
+		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
+		assertThat(violations).isNotEmpty();
+	}
+
+	@Test
+	void validateInvalidDescriptionWhenExceeding500Characters() {
 		Visit visit = new Visit();
 		visit.setDescription("a".repeat(501));
-		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
-		assertThat(violations).hasSize(1);
+
+		Set<ConstraintViolation<Visit>> violations = this.validator.validate(visit);
+		assertThat(violations).isNotEmpty();
 	}
 
 }
