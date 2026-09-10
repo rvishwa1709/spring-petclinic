@@ -102,12 +102,10 @@ class OwnerController {
 				result.rejectValue("telephone", "notFound", "not found");
 				return "owners/findOwners";
 			}
-
 			if (ownersResults.getTotalElements() == 1) {
-				owner = ownersResults.iterator().next();
-				return "redirect:/owners/" + owner.getId();
+				Owner foundOwner = ownersResults.iterator().next();
+				return "redirect:/owners/" + foundOwner.getId();
 			}
-
 			return addPaginationModel(page, model, ownersResults);
 		}
 
