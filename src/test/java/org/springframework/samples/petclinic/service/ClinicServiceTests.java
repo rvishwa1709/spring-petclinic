@@ -53,11 +53,11 @@ import org.springframework.transaction.annotation.Transactional;
  * <li><strong>Dependency Injection</strong> of test fixture instances, meaning that we
  * don't need to perform application context lookups. See the use of
  * {@link Autowired @Autowired} on the <code> </code> instance variable, which uses
- * autowiring <em>by type</em>.
+ * autowiring <em>by type</em>.</li>
  * <li><strong>Transaction management</strong>, meaning each test method is executed in
  * its own transaction, which is automatically rolled back by default. Thus, even if tests
  * insert or otherwise change database state, there is no need for a teardown or cleanup
- * script.
+ * script.</li>
  * <li>An {@link org.springframework.context.ApplicationContext ApplicationContext} is
  * also inherited and can be used for explicit bean lookup if necessary.</li>
  * </ul>
@@ -88,11 +88,24 @@ class ClinicServiceTests {
 
 	@Test
 	void shouldFindOwnersByLastName() {
-		Page<Owner> owners = this.owners.findByLastNameStartingWith("Davis", pageable);
+		Page<Owner> owners = this.owners.findByLastNameContainingIgnoreCase("Davis", pageable);
 		assertThat(owners).hasSize(2);
 
-		owners = this.owners.findByLastNameStartingWith("Daviss", pageable);
+		owners = this.owners.findByLastNameContainingIgnoreCase("Daviss", pageable);
 		assertThat(owners).isEmpty();
+	}
+
+	@Test
+	void shouldFindOwnersByLastNamePartialAndCaseInsensitive() {
+		Page<Owner> owners = this.owners.findByLastNameContainingIgnoreCase("davis", pageable);
+		assertThat(owners).hasSize(2);
+
+		owners = this.owners.findByLastNameContainingIgnoreCase("mct", pageable);
+		assertThat(owners).hasSize(1);
+		assertThat(owners.getContent().get(0).getLastName()).isEqualTo("McTavish");
+
+		owners = this.owners.findByLastNameContainingIgnoreCase("es", pageable);
+		assertThat(owners).hasSize(2);
 	}
 
 	@Test
@@ -109,7 +122,7 @@ class ClinicServiceTests {
 	@Test
 	@Transactional
 	void shouldInsertOwner() {
-		Page<Owner> owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
+		Page<Owner> owners = this.owners.findByLastNameContainingIgnoreCase("Schultz", pageable);
 		int found = (int) owners.getTotalElements();
 
 		Owner owner = new Owner();
@@ -121,7 +134,7 @@ class ClinicServiceTests {
 		this.owners.save(owner);
 		assertThat(owner.getId()).isNotZero();
 
-		owners = this.owners.findByLastNameStartingWith("Schultz", pageable);
+		owners = this.owners.findByLastNameContainingIgnoreCase("Schultz", pageable);
 		assertThat(owners.getTotalElements()).isEqualTo(found + 1);
 	}
 
@@ -299,7 +312,7 @@ class ClinicServiceTests {
 
 		Pet pet2 = new Pet();
 		pet2.setName("samepetname"); // Case-insensitive duplicate name, but for a
-										// different owner
+    // different owner
 		pet2.setType(catType);
 		pet2.setBirthDate(LocalDate.now());
 		owner2.addPet(pet2);
