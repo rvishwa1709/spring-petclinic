@@ -53,11 +53,11 @@ import org.springframework.transaction.annotation.Transactional;
  * <li><strong>Dependency Injection</strong> of test fixture instances, meaning that we
  * don't need to perform application context lookups. See the use of
  * {@link Autowired @Autowired} on the <code> </code> instance variable, which uses
- * autowiring <em>by type</em>.
+ * autowiring <em>by type</em>.</li>
  * <li><strong>Transaction management</strong>, meaning each test method is executed in
  * its own transaction, which is automatically rolled back by default. Thus, even if tests
  * insert or otherwise change database state, there is no need for a teardown or cleanup
- * script.
+ * script.</li>
  * <li>An {@link org.springframework.context.ApplicationContext ApplicationContext} is
  * also inherited and can be used for explicit bean lookup if necessary.</li>
  * </ul>
@@ -92,6 +92,16 @@ class ClinicServiceTests {
 		assertThat(owners).hasSize(2);
 
 		owners = this.owners.findByLastNameStartingWith("Daviss", pageable);
+		assertThat(owners).isEmpty();
+	}
+
+	@Test
+	void shouldFindOwnersByTelephone() {
+		Page<Owner> owners = this.owners.findByTelephone("6085551023", pageable);
+		assertThat(owners).hasSize(1);
+		assertThat(owners.iterator().next().getLastName()).isEqualTo("Franklin");
+
+		owners = this.owners.findByTelephone("0000000000", pageable);
 		assertThat(owners).isEmpty();
 	}
 
@@ -229,8 +239,8 @@ class ClinicServiceTests {
 		owner6.addVisit(pet7.getId(), visit);
 		this.owners.save(owner6);
 
-		assertThat(pet7.getVisits()) //
-			.hasSize(found + 1) //
+		assertThat(pet7.getVisits())
+			.hasSize(found + 1)
 			.allMatch(value -> value.getId() != null);
 	}
 
@@ -243,8 +253,8 @@ class ClinicServiceTests {
 		Pet pet7 = owner6.getPet(7);
 		Collection<Visit> visits = pet7.getVisits();
 
-		assertThat(visits) //
-			.hasSize(2) //
+		assertThat(visits)
+			.hasSize(2)
 			.element(0)
 			.extracting(Visit::getDate)
 			.isNotNull();
@@ -299,7 +309,7 @@ class ClinicServiceTests {
 
 		Pet pet2 = new Pet();
 		pet2.setName("samepetname"); // Case-insensitive duplicate name, but for a
-										// different owner
+    // different owner
 		pet2.setType(catType);
 		pet2.setBirthDate(LocalDate.now());
 		owner2.addPet(pet2);

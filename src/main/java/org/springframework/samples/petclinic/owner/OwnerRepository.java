@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.owner;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -43,6 +44,14 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * found)
 	 */
 	Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
+
+	/**
+	 * Retrieve {@link Owner}s from the data store by telephone.
+	 * @param telephone Value to search for
+	 * @param pageable pageable information
+	 * @return a Page of matching {@link Owner}s (or an empty Page if none found)
+	 */
+	Page<Owner> findByTelephone(String telephone, Pageable pageable);
 
 	/**
 	 * Retrieve an {@link Owner} from the data store by id.
