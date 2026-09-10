@@ -48,6 +48,7 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	/**
 	 * Retrieve {@link Owner}s from the data store by telephone.
 	 * @param telephone Value to search for
+	 * @param pageable pageable information
 	 * @return a Page of matching {@link Owner}s (or an empty Page if none found)
 	 */
 	Page<Owner> findByTelephone(String telephone, Pageable pageable);
