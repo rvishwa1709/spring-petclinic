@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.samples.petclinic.owner.Visit;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import jakarta.validation.ConstraintViolation;
@@ -75,6 +76,43 @@ class ValidatorTests {
 		ConstraintViolation<Person> violation = getOnlyViolation(constraintViolations);
 		assertThat(violation.getPropertyPath()).hasToString("lastName");
 		assertThat(violation.getMessage()).isEqualTo("must not be blank");
+	}
+
+	@Test
+	void shouldValidateVisitWithValidDescriptionLengths() {
+		Validator validator = createValidator();
+
+		Visit visit1 = new Visit();
+		visit1.setDescription("a");
+		assertThat(validator.validate(visit1)).isEmpty();
+
+		Visit visit500 = new Visit();
+		visit500.setDescription("a".repeat(500));
+		assertThat(validator.validate(visit500)).isEmpty();
+	}
+
+	@Test
+	void shouldNotValidateVisitWhenDescriptionBlank() {
+		Validator validator = createValidator();
+
+		Visit visit = new Visit();
+		visit.setDescription("");
+
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		ConstraintViolation<Visit> violation = getOnlyViolation(violations);
+		assertThat(violation.getPropertyPath()).hasToString("description");
+	}
+
+	@Test
+	void shouldNotValidateVisitWhenDescriptionExceeds500Chars() {
+		Validator validator = createValidator();
+
+		Visit visit = new Visit();
+		visit.setDescription("a".repeat(501));
+
+		Set<ConstraintViolation<Visit>> violations = validator.validate(visit);
+		ConstraintViolation<Visit> violation = getOnlyViolation(violations);
+		assertThat(violation.getPropertyPath()).hasToString("description");
 	}
 
 }
