@@ -16,6 +16,9 @@
 
 package org.springframework.samples.petclinic.owner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -100,6 +103,84 @@ class VisitControllerTests {
 				.param("name", "George")
 				.param("date", LocalDate.now().toString())
 				.param("description", "Visit Description"))
+			.andExpect(model().attributeHasFieldErrors("visit", "date"))
+			.andExpect(model().attributeHasFieldErrorCode("visit", "date", "typeMismatch.visitDate"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("pets/createOrUpdateVisitForm"));
+	}
+
+	@Test
+	void initEditVisitForm() throws Exception {
+		Owner owner = this.owners.findById(TEST_OWNER_ID).orElseThrow();
+		Pet pet = owner.getPet(TEST_PET_ID);
+		Visit visit = new Visit();
+		visit.setId(1);
+		visit.setDate(LocalDate.now().plusDays(5));
+		visit.setDescription("Checkup");
+		pet.addVisit(visit);
+
+		mockMvc.perform(get("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit", TEST_OWNER_ID, TEST_PET_ID, 1))
+			.andExpect(status().isOk())
+			.andExpect(model().attributeExists("visit"))
+			.andExpect(model().attribute("visit", hasProperty("description", is("Checkup"))))
+			.andExpect(model().attribute("visit", hasProperty("date", is(LocalDate.now().plusDays(5)))))
+			.andExpect(view().name("pets/createOrUpdateVisitForm"));
+	}
+
+	@Test
+	void processEditVisitFormSuccess() throws Exception {
+		Owner owner = this.owners.findById(TEST_OWNER_ID).orElseThrow();
+		Pet pet = owner.getPet(TEST_PET_ID);
+		Visit visit = new Visit();
+		visit.setId(1);
+		visit.setDate(LocalDate.now().plusDays(5));
+		visit.setDescription("Initial Visit Description");
+		pet.addVisit(visit);
+
+		mockMvc
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit", TEST_OWNER_ID, TEST_PET_ID, 1)
+				.param("date", LocalDate.now().plusDays(10).toString())
+				.param("description", "Updated Visit Description"))
+			.andExpect(status().is3xxRedirection())
+			.andExpect(view().name("redirect:/owners/{ownerId}"));
+
+		assertThat(pet.getVisits()).hasSize(1);
+		assertThat(visit.getDescription()).isEqualTo("Updated Visit Description");
+		assertThat(visit.getDate()).isEqualTo(LocalDate.now().plusDays(10));
+	}
+
+	@Test
+	void processEditVisitFormHasErrors() throws Exception {
+		Owner owner = this.owners.findById(TEST_OWNER_ID).orElseThrow();
+		Pet pet = owner.getPet(TEST_PET_ID);
+		Visit visit = new Visit();
+		visit.setId(1);
+		visit.setDate(LocalDate.now().plusDays(5));
+		visit.setDescription("Initial Description");
+		pet.addVisit(visit);
+
+		mockMvc
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit", TEST_OWNER_ID, TEST_PET_ID, 1)
+				.param("description", ""))
+			.andExpect(model().attributeHasErrors("visit"))
+			.andExpect(status().isOk())
+			.andExpect(view().name("pets/createOrUpdateVisitForm"));
+	}
+
+	@Test
+	void processEditVisitFormHasErrorsWhenVisitDateIsNotInFuture() throws Exception {
+		Owner owner = this.owners.findById(TEST_OWNER_ID).orElseThrow();
+		Pet pet = owner.getPet(TEST_PET_ID);
+		Visit visit = new Visit();
+		visit.setId(1);
+		visit.setDate(LocalDate.now().plusDays(5));
+		visit.setDescription("Initial Description");
+		pet.addVisit(visit);
+
+		mockMvc
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/{visitId}/edit", TEST_OWNER_ID, TEST_PET_ID, 1)
+				.param("date", LocalDate.now().toString())
+				.param("description", "Updated Visit Description"))
 			.andExpect(model().attributeHasFieldErrors("visit", "date"))
 			.andExpect(model().attributeHasFieldErrorCode("visit", "date", "typeMismatch.visitDate"))
 			.andExpect(status().isOk())
