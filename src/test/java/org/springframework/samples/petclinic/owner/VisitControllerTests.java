@@ -84,7 +84,7 @@ class VisitControllerTests {
 	}
 
 	@Test
-	void processNewVisitFormSuccessOnMaxAllowedDate() throws Exception {
+	void processNewVisitFormSuccessAt90DaysBoundary() throws Exception {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")
@@ -118,7 +118,7 @@ class VisitControllerTests {
 	}
 
 	@Test
-	void processNewVisitFormHasErrorsWhenVisitDateIsPast() throws Exception {
+	void processNewVisitFormHasErrorsWhenVisitDateIsInPast() throws Exception {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")
@@ -131,7 +131,7 @@ class VisitControllerTests {
 	}
 
 	@Test
-	void processNewVisitFormHasErrorsWhenVisitDateIsBeyond90Days() throws Exception {
+	void processNewVisitFormHasErrorsWhenVisitDateIsMoreThan90DaysInFuture() throws Exception {
 		mockMvc
 			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
 				.param("name", "George")
